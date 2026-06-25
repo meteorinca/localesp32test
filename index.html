@@ -1,7 +1,60 @@
-<!doctype html>
-<html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Python Robot Control</title>
+  <style>
+    body { font-family: sans-serif; padding: 20px; }
+    textarea { width: 100%; height: 150px; font-family: monospace; }
+    #output { background: #f4f4f4; padding: 12px; margin-top: 12px; white-space: pre-wrap; }
+    button { margin-top: 8px; padding: 8px 16px; }
+  </style>
+</head>
 <body>
-  <button onclick="location.href='http://10.0.0.70/l1off'">L1 Off</button>
-  <button onclick="location.href='http://10.0.0.70/l1on'">L1 On</button>
+  <h1>🤖 SimpleBot Python Console</h1>
+  <p>Type Python code below and press <strong>Run</strong>. Use <code>await fetch('/l1on')</code> to control the bot.</p>
+
+  <textarea id="code"># Example: toggle the LED
+import js
+await js.fetch('/toggle')
+</textarea>
+  <br/>
+  <button id="runBtn">▶ Run</button>
+  <div id="output">Waiting for Pyodide…</div>
+
+  <script src="https://cdn.jsdelivr.net/pyodide/v0.26.2/full/pyodide.js"></script>
+  <script>
+    const output = document.getElementById('output');
+    const runBtn = document.getElementById('runBtn');
+    const codeArea = document.getElementById('code');
+    let pyodide;
+
+    async function main() {
+      pyodide = await loadPyodide();
+      output.textContent = 'Pyodide ready. You can now run Python commands.';
+    }
+
+    runBtn.addEventListener('click', async () => {
+      if (!pyodide) return;
+      const code = codeArea.value;
+      output.textContent = 'Running…';
+      try {
+        // Redirect Python's stdout to our output div
+        await pyodide.runPythonAsync(`
+import sys
+from io import StringIO
+sys.stdout = StringIO()
+        `);
+        await pyodide.runPythonAsync(code);
+        const stdout = await pyodide.runPythonAsync('sys.stdout.getvalue()');
+        output.textContent = stdout || '(no output)';
+      } catch (err) {
+        output.textContent = 'Error: ' + err.message;
+      }
+    });
+
+    main();
+  </script>
 </body>
 </html>
