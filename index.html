@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ESP32 Test</title>
+  <style>
+    body { font-family: sans-serif; padding: 24px; }
+    button { padding: 12px 16px; margin: 8px 8px 8px 0; }
+    #status { margin-top: 16px; white-space: pre-wrap; }
+  </style>
+</head>
+<body>
+  <h1>ESP32 Local Test</h1>
+  <button onclick="send('/l1off')">L1 Off</button>
+  <button onclick="send('/l1on')">L1 On</button>
+  <div id="status">Ready.</div>
+
+  <script>
+    const base = 'http://simplebot7.local';
+
+    async function send(path) {
+      const url = base + path;
+      const status = document.getElementById('status');
+      status.textContent = 'Sending to ' + url + '...';
+
+      try {
+        const res = await fetch(url, { mode: 'cors' });
+        status.textContent = `Response: ${res.status} ${res.statusText}`;
+      } catch (err) {
+        status.textContent = 'Failed: ' + err;
+      }
+    }
+  </script>
+</body>
+</html>
