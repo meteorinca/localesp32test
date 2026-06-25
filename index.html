@@ -1,7 +1,37 @@
 <!doctype html>
-<html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ESP32 Control</title>
+  <style>
+    body { font-family: sans-serif; padding: 24px; }
+    button { padding: 12px 16px; margin-right: 8px; }
+    #status { margin-top: 16px; white-space: pre-wrap; }
+  </style>
+</head>
 <body>
-  <button onclick="location.href='http://10.0.0.70/l1off'">L1 Off</button>
-  <button onclick="location.href='http://10.0.0.70/l1on'">L1 On</button>
+  <h1>ESP32 Control</h1>
+  <button onclick="send('/l1off')">L1 Off</button>
+  <button onclick="send('/l1on')">L1 On</button>
+  <div id="status">Ready.</div>
+
+  <script>
+    const base = 'http://10.0.0.70';
+
+    async function send(path) {
+      const status = document.getElementById('status');
+      const url = base + path;
+      status.textContent = 'Sending to ' + url + '...';
+
+      try {
+        const res = await fetch(url, { mode: 'cors' });
+        const text = await res.text();
+        status.textContent = 'Response: ' + res.status + '\n' + text;
+      } catch (e) {
+        status.textContent = 'Failed: ' + e;
+      }
+    }
+  </script>
 </body>
 </html>
